@@ -1,9 +1,11 @@
 import gymnasium as gym
 import numpy as np
 from tensorflow import keras
-from train import train_dqn, DQNAgent
+from train import DQNAgent
+import os
+os.environ['SDL_VIDEODRIVER'] = 'cocoa'  # For macOS
 
-def test_agent(agent, episodes=10, render=False):
+def test_agent(agent, episodes=10, render=True):
     """Test the trained agent's performance"""
     env = gym.make('CartPole-v1', render_mode='human' if render else None)
     total_rewards = []
@@ -19,6 +21,7 @@ def test_agent(agent, episodes=10, render=False):
         for step in range(500):
             action = agent.act(state)
             next_state, reward, terminated, truncated, _ = env.step(action)
+
             done = terminated or truncated
             
             state = next_state
@@ -53,18 +56,19 @@ def load_trained_agent(model_path='dqn_cartpole_model.h5'):
     env.close()
     
     agent = DQNAgent(state_size, action_size)
-    agent.q_network = keras.models.load_model(model_path)
+    try:
+        agent.q_network.load_weights(model_path)
+    except:
+        # If weights loading fails, try loading the full model
+        agent.q_network = keras.models.load_model(model_path, compile=False)
     agent.epsilon = 0  # No exploration for testing
     
     print(f"Model loaded from '{model_path}'")
     return agent
 
 if __name__ == "__main__":
-    print("Training agent...")
-    trained_agent = train_dqn()
-    
-    print("\nTesting trained agent (no rendering)...")
-    test_agent(trained_agent, episodes=10)
+    print("Loading trained agent...")
+    trained_agent = load_trained_agent()
     
     print("\nTesting with visual rendering...")
     test_agent(trained_agent, episodes=3, render=True)

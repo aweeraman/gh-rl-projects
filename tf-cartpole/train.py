@@ -9,7 +9,7 @@ from collections import deque
 # tf.config.set_visible_devices([], 'GPU')
 
 # Simple neural network for Q-function approximation
-def create_dqn_model(state_size, action_size, hidden_size=64):
+def create_dqn_model(state_size, action_size, hidden_size=128):
     model = keras.Sequential([
         keras.layers.Dense(hidden_size, activation='relu', input_shape=(state_size,)),
         keras.layers.Dense(hidden_size, activation='relu'),
@@ -117,7 +117,7 @@ def train_dqn(render=False):
     action_size = env.action_space.n  # 2 for CartPole
     
     agent = DQNAgent(state_size, action_size)
-    episodes = 500
+    episodes = 100
     target_update_freq = 10  # Update target network every 10 episodes
     
     for episode in range(episodes):

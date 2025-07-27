@@ -61,7 +61,7 @@ def load_trained_agent(model_path='dqn_cartpole_model.h5'):
     except:
         # If weights loading fails, try loading the full model
         agent.q_network = keras.models.load_model(model_path, compile=False)
-    agent.epsilon = 0  # No exploration for testing
+    agent.epsilon = 0.5  # No exploration for testing
     
     print(f"Model loaded from '{model_path}'")
     return agent

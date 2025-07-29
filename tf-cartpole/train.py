@@ -158,43 +158,6 @@ def train_dqn(render=False):
     
     return agent
 
-# Alternative: Using TensorFlow's GradientTape for more control (advanced)
-class DQNAgentAdvanced:
-    def __init__(self, state_size, action_size, lr=0.001):
-        self.state_size = state_size
-        self.action_size = action_size
-        self.epsilon = 1.0
-        self.epsilon_decay = 0.995
-        self.epsilon_min = 0.01
-        
-        self.q_network = create_dqn_model(state_size, action_size)
-        self.target_network = create_dqn_model(state_size, action_size)
-        self.optimizer = keras.optimizers.Adam(learning_rate=lr)
-        
-        self.memory = ReplayBuffer(10000)
-        self.batch_size = 32
-        self.gamma = 0.99
-    
-    @tf.function  # Compile for faster execution
-    def train_step(self, states, actions, rewards, next_states, dones):
-        with tf.GradientTape() as tape:
-            # Current Q-values
-            current_q_values = self.q_network(states)
-            current_q_values = tf.gather_nd(current_q_values, 
-                                          tf.stack([tf.range(tf.shape(actions)[0]), actions], axis=1))
-            
-            # Target Q-values
-            next_q_values = tf.reduce_max(self.target_network(next_states), axis=1)
-            target_q_values = rewards + (1.0 - tf.cast(dones, tf.float32)) * self.gamma * next_q_values
-            
-            # Loss
-            loss = tf.reduce_mean(tf.square(target_q_values - current_q_values))
-        
-        # Apply gradients
-        gradients = tape.gradient(loss, self.q_network.trainable_variables)
-        self.optimizer.apply_gradients(zip(gradients, self.q_network.trainable_variables))
-        return loss
-
 # Run training
 if __name__ == "__main__":
     trained_agent = train_dqn()
